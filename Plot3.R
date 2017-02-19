@@ -29,7 +29,7 @@ NEI3 <- subset(NEI, fips == "24510", c(year,type, Emissions))
 ## use tapply function to separate the data by year and type and get the sums for those years/types
 sum3 <- with(NEI3, tapply(Emissions, list(year,type), sum, na.rm=T))
 ## convert this into a data frame
-sum3b <- data.frame(Year = rownames(sum3), sum3)
+sum3b <- data.frame(Year = as.numeric(rownames(sum3)), sum3)
 
 ## check the column names
 colnames(sum3)
@@ -40,18 +40,22 @@ colnames(sum3)[3] = 'ON.ROAD'
 
 ## make the data tidy
 dtotal3 <- gather(sum3b, key = Type, value = sum, NON.ROAD:POINT)
+#dtotal3 <- dtotal3[order(dtotal3$Year),]
 
 ## make a new column called EmissInHund so your plot will be more easily readable
-dtotal3$EmissInHund <- with(dtotal3, sum/100)
+dtotal3$EmissInHund <- dtotal3$sum/100
 
 ## Check the range
 range(dtotal3$EmissInHund)
 ## [1]  0.5582356 21.0762500
 
 
-## Construct the plot and save it to a PNG file with a width of 480 pixels and a height of 480 pixels.
+## Construct the plot and save it to a PNG file.
 png(filename="Plot3.png", height=480, width=600)
-P3 <- ggplot(dtotal3, aes(Year, EmissInHund, color = Type)) 
-P3 <- P3 + geom_line(linetype = "solid", size = 2) + xlab("Year") + ylab("PM2.5 Emissions (Hundreds)") + ggtitle("Baltimore City, MD PM2.5 Emissions - Sum by Year & Type")
+P3 <- ggplot(dtotal3, aes(Year, EmissInHund, color = Type))
+P3 <- P3 + geom_line(linetype = "solid", size = 2) +
+  xlab("Year") +
+  ylab(expression("Emissions (Hundreds of Tons)")) +
+  ggtitle("Total Emissions in Baltimore City")
 print(P3)
 dev.off()
